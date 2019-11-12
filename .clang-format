@@ -1,0 +1,12 @@
+UseTab: Never
+IndentWidth: 4
+IndentCaseLabels: true
+BreakBeforeBraces: Attach
+ColumnLimit: 120
+NamespaceIndentation: All
+AllowShortFunctionsOnASingleLine: Empty
+CompactNamespaces: true
+PointerAlignment: Left
+SortIncludes: false
+FixNamespaceComments: true
+AlwaysBreakTemplateDeclarations: true
