@@ -1,16 +1,21 @@
 #include <SFML/Graphics.hpp>
 
+#include "action.hpp"
 #include "objects.hpp"
 
 #define WINDOW_SIZE_X 1280
 #define WINDOW_SIZE_Y 720
 #define MUUR_THICC 20
-#define BALL_SPEED 5
+#define BALL_SPEED 1 // Dont change this, the collision system will break
+#define FRAMERATE 60
+#define UPDATES_PER_FRAME 4
 
 int main() {
     // Window setup
+    uint64_t updateCount = 0;
+    uint64_t frameCount = 0;
     sf::RenderWindow window(sf::VideoMode(WINDOW_SIZE_X, WINDOW_SIZE_Y), "Stuiter");
-    window.setFramerateLimit(60);
+    window.setFramerateLimit(FRAMERATE);
 
     // Setup other objects
     std::vector<wall*> walls;
@@ -25,6 +30,16 @@ int main() {
     walls.push_back(&wall3);
     walls.push_back(&wall4);
 
+    action actions[] = {
+        action([] { return true; },
+               [&] { ball.move(sf::Vector2f(ball.direction.x * BALL_SPEED, ball.direction.y * BALL_SPEED)); }),
+
+        action([] { return true; },
+               [&] {
+                   for (auto wall : walls)
+                       ball.interact(wall->getGlobalBounds());
+               })};
+
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -33,22 +48,22 @@ int main() {
         }
 
         // Update scene
-        // 1. move ball
-        ball.move(sf::Vector2f(ball.direction.x * BALL_SPEED, ball.direction.y * BALL_SPEED));
+        for (auto& action : actions)
+            action();
 
-        // 2. boing
-        for (auto wall : walls) {
-            // TODO: do boing
+        if (updateCount % UPDATES_PER_FRAME == 0) {
+            // Draw calls
+            window.clear();
+
+            ball.draw(window);
+            for (auto wall : walls)
+                wall->draw(window);
+
+            window.display();
+            frameCount++;
         }
 
-        // Draw calls
-        window.clear();
-
-        ball.draw(window);
-        for (auto wall : walls)
-            wall->draw(window);
-
-        window.display();
+        updateCount++;
     }
 
     return 0;

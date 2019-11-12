@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <SFML/Graphics.hpp>
 
 class drawable {
@@ -31,6 +32,15 @@ class ball : public drawable {
     void move(sf::Vector2f pos) {
         circle.move(pos);
     }
+
+    void interact(sf::FloatRect other) {
+        sf::FloatRect intersection;
+        if (circle.getGlobalBounds().intersects(other, intersection)) {
+            // Only works when BALL_SPEED == 1
+            // TODO: Hoek van inval == hoek van uitval
+            direction = sf::Vector2f(direction.x * -1, direction.y * -1);
+        }
+    }
 };
 
 class wall : public drawable {
@@ -46,5 +56,9 @@ class wall : public drawable {
 
     void draw(sf::RenderWindow& window) const override {
         window.draw(rect);
+    }
+
+    sf::FloatRect getGlobalBounds() {
+        return rect.getGlobalBounds();
     }
 };
