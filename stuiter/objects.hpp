@@ -8,11 +8,14 @@ class drawable {
 };
 
 class ball : public drawable {
+  public:
+    sf::Vector2f direction;
+
   private:
     sf::CircleShape circle;
 
   public:
-    ball(float radius) {
+    ball(float radius) : direction(1, 1) {
         circle.setRadius(radius);
         circle.setFillColor(sf::Color::Green);
     }
@@ -23,6 +26,10 @@ class ball : public drawable {
 
     void setPosition(sf::Vector2f pos) {
         circle.setPosition(pos);
+    }
+
+    void move(sf::Vector2f pos) {
+        circle.move(pos);
     }
 };
 
