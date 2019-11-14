@@ -33,13 +33,8 @@ class ball : public drawable {
         circle.move(pos);
     }
 
-    void interact(sf::FloatRect other) {
-        sf::FloatRect intersection;
-        if (circle.getGlobalBounds().intersects(other, intersection)) {
-            // Only works when BALL_SPEED == 1
-            // TODO: Hoek van inval == hoek van uitval
-            direction = sf::Vector2f(direction.x * -1, direction.y * -1);
-        }
+    bool intersects(const sf::FloatRect& other) {
+        return circle.getGlobalBounds().intersects(other);
     }
 };
 

@@ -34,11 +34,11 @@ int main() {
         action([] { return true; },
                [&] { ball.move(sf::Vector2f(ball.direction.x * BALL_SPEED, ball.direction.y * BALL_SPEED)); }),
 
-        action([] { return true; },
-               [&] {
-                   for (auto wall : walls)
-                       ball.interact(wall->getGlobalBounds());
-               })};
+        // Not scalable, very sad!
+        action([&] { return ball.intersects(wall1.getGlobalBounds()); }, [&] { ball.direction.y *= -1; }),
+        action([&] { return ball.intersects(wall2.getGlobalBounds()); }, [&] { ball.direction.x *= -1; }),
+        action([&] { return ball.intersects(wall3.getGlobalBounds()); }, [&] { ball.direction.x *= -1; }),
+        action([&] { return ball.intersects(wall4.getGlobalBounds()); }, [&] { ball.direction.y *= -1; })};
 
     while (window.isOpen()) {
         sf::Event event;
