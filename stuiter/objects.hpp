@@ -53,6 +53,10 @@ class wall : public drawable {
         window.draw(rect);
     }
 
+    void move(const sf::Vector2f& offset) {
+        rect.move(offset);
+    }
+
     sf::FloatRect getGlobalBounds() {
         return rect.getGlobalBounds();
     }
