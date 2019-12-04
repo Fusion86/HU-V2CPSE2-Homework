@@ -37,7 +37,18 @@ class drawable {
 
     std::ostream& operator<<(std::ostream& os) { return os; }
 
-    std::istream& operator>>(std::istream& is) { return is; }
+    std::istream& operator>>(std::istream& is) {
+        std::string type;
+        is >> position;
+        is >> type;
+
+        switch (type) {
+            case "test":
+                break;
+        }
+
+        return is;
+    }
 
   protected:
     std::string name;
