@@ -11,12 +11,14 @@ static std::vector<drawable*> drawables;
 drawable* read_object(std::istream& is) {
     std::string type;
     sf::Vector2f pos;
-    is >> type >> pos;
+    is >> pos >> type;
 
     if (type == "Circle") {
         float diameter;
+        sf::Color color;
         is >> diameter;
-        return new circle(pos, diameter);
+        is >> color;
+        return new circle(pos, diameter, color);
     } else if (type == "Rect") {
         sf::Vector2f end;
         sf::Color color;
@@ -42,11 +44,11 @@ drawable* read_object(std::istream& is) {
 
 void load_state() {
     std::ifstream ifs(LEVEL_FILE_NAME);
-    ifs.exceptions(std::ifstream::failbit | std::ifstream::badbit | std::ifstream::eofbit);
+    ifs.exceptions(std::ifstream::failbit | std::ifstream::eofbit);
 
-    do {
+    while (!ifs.eof()) {
         drawables.push_back(read_object(ifs));
-    } while (1);
+    }
 }
 
 void cleanup() {
@@ -62,7 +64,14 @@ void save_state() {
 }
 
 int main() {
-    load_state();
+    try {
+        load_state();
+    } catch (std::ios_base::failure& e) {
+        // Garbage language
+        // https://codereview.stackexchange.com/questions/57829/better-option-than-errno-for-file-io-error-handling
+        std::cout << "File error: " << e.what() << std::endl;
+        return 1;
+    }
 
     // Display window and move objects
 

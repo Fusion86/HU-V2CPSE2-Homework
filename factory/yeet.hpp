@@ -81,6 +81,7 @@ class drawable {
   public:
     drawable(sf::Vector2f position) : position(position) {}
 
+    virtual ~drawable() {}
     virtual void draw(sf::RenderWindow& window) = 0;
 
   protected:
@@ -94,12 +95,14 @@ class selectable {
 
 class circle : public drawable, selectable {
   public:
-    circle(sf::Vector2f position, float diameter) : drawable(position), diameter(diameter) {}
+    circle(sf::Vector2f position, float diameter, sf::Color color)
+        : drawable(position), diameter(diameter), color(color) {}
 
     virtual void draw(sf::RenderWindow& window) override {}
 
   protected:
     float diameter;
+    sf::Color color;
 };
 
 class rectangle : public drawable, selectable {
