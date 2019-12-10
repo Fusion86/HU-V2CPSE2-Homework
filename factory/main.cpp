@@ -47,7 +47,10 @@ drawable* read_object(std::istream& is) {
 
 void load_state() {
     std::ifstream ifs(LEVEL_FILE_NAME);
-    // ifs.exceptions(std::ifstream::failbit | std::ifstream::eofbit);
+
+    if (!ifs.is_open()) {
+        throw new std::runtime_error("Coudln't open file.");
+    }
 
     while (!ifs.eof()) {
         drawables.push_back(read_object(ifs));
@@ -77,7 +80,7 @@ int main() {
     }
 
     // Display window and move objects
-    sf::RenderWindow window(sf::VideoMode(WINDOW_SIZE_X, WINDOW_SIZE_Y), "Stuiter");
+    sf::RenderWindow window(sf::VideoMode(WINDOW_SIZE_X, WINDOW_SIZE_Y), "Fabriek");
     window.setFramerateLimit(FRAMERATE);
 
     while (window.isOpen()) {
