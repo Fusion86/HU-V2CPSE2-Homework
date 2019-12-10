@@ -84,7 +84,9 @@ class drawable {
     virtual ~drawable() {}
     virtual void draw(sf::RenderTarget& disp) = 0;
 
-    virtual void update() {}
+    virtual void update() {
+        // TODO: If mouse over & hold -> isSelected = true
+    }
 
   protected:
     sf::Vector2f position;
@@ -155,8 +157,7 @@ class line : public drawable {
 class picture : public drawable {
   public:
     picture(sf::Vector2f position, sf::Vector2f scale, std::string img) : drawable(position), scale(scale), img(img) {
-        sf::Texture texture;
-        if (!texture.loadFromFile("baby_yoda.png")) throw "Couldn't load baby_yoda.png!";
+        if (!texture.loadFromFile(img)) throw new std::runtime_error("Couldn't load '" + img + "'");
         sprite.setScale(scale);
         sprite.setTexture(texture);
     }
@@ -170,6 +171,7 @@ class picture : public drawable {
     sf::Vector2f scale;
     std::string img;
     sf::Sprite sprite;
+    sf::Texture texture;
 
     virtual sf::Transformable& getTransformable() override { return sprite; }
 };

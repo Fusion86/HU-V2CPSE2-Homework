@@ -90,6 +90,9 @@ int main() {
         }
 
         for (auto& x : drawables)
+            x->update();
+
+        for (auto& x : drawables)
             x->draw(window);
 
         window.display();
