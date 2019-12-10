@@ -35,11 +35,11 @@ drawable* read_object(std::istream& is) {
         is >> color;
         return new line(pos, length, rotation, color);
     } else if (type == "Picture") {
-        sf::Vector2f size;
+        sf::Vector2f scale;
         std::string img;
-        is >> size;
+        is >> scale;
         is >> img;
-        return new picture(pos, size, img);
+        return new picture(pos, scale, img);
     } else {
         throw new invalid_type_exception(type);
     }

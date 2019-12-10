@@ -83,23 +83,20 @@ class drawable {
 
     virtual ~drawable() {}
     virtual void draw(sf::RenderTarget& disp) = 0;
-    virtual sf::Transformable& getTransformable() = 0;
 
     virtual void update() {}
-
-    // virtual bool isSelected() { return false; }
 
   protected:
     sf::Vector2f position;
     bool isSelected = false;
+
+    virtual sf::Transformable& getTransformable() = 0;
 };
 
 class circle : public drawable {
   public:
     circle(sf::Vector2f position, float diameter, sf::Color color)
         : drawable(position), diameter(diameter), color(color), shape(diameter / 2) {}
-
-    virtual sf::Transformable& getTransformable() override { return shape; }
 
     virtual void draw(sf::RenderTarget& disp) override {
         shape.setPosition(position);
@@ -111,14 +108,14 @@ class circle : public drawable {
     float diameter;
     sf::Color color;
     sf::CircleShape shape;
+
+    virtual sf::Transformable& getTransformable() override { return shape; }
 };
 
 class rectangle : public drawable {
   public:
     rectangle(sf::Vector2f position, sf::Vector2f size, sf::Color color)
         : drawable(position), size(size), color(color), shape(size) {}
-
-    virtual sf::Transformable& getTransformable() override { return shape; }
 
     virtual void draw(sf::RenderTarget& disp) override {
         shape.setPosition(position);
@@ -130,14 +127,14 @@ class rectangle : public drawable {
     sf::Vector2f size;
     sf::Color color;
     sf::RectangleShape shape;
+
+    virtual sf::Transformable& getTransformable() override { return shape; }
 };
 
 class line : public drawable {
   public:
     line(sf::Vector2f position, float length, float rotation, sf::Color color)
         : drawable(position), length(length), rotation(rotation), color(color), shape(sf::Vector2f(length, 10)) {}
-
-    virtual sf::Transformable& getTransformable() override { return shape; }
 
     virtual void draw(sf::RenderTarget& disp) override {
         shape.setPosition(position);
@@ -151,18 +148,28 @@ class line : public drawable {
     float rotation;
     sf::Color color;
     sf::RectangleShape shape;
+
+    virtual sf::Transformable& getTransformable() override { return shape; }
 };
 
 class picture : public drawable {
   public:
-    picture(sf::Vector2f position, sf::Vector2f size, std::string img) : drawable(position), size(size), img(img) {}
+    picture(sf::Vector2f position, sf::Vector2f scale, std::string img) : drawable(position), scale(scale), img(img) {
+        sf::Texture texture;
+        if (!texture.loadFromFile("baby_yoda.png")) throw "Couldn't load baby_yoda.png!";
+        sprite.setScale(scale);
+        sprite.setTexture(texture);
+    }
 
-    virtual sf::Transformable& getTransformable() override { return shape; }
-
-    virtual void draw(sf::RenderTarget& disp) override {}
+    virtual void draw(sf::RenderTarget& disp) override {
+        sprite.setPosition(position);
+        disp.draw(sprite);
+    }
 
   protected:
-    sf::Vector2f size;
+    sf::Vector2f scale;
     std::string img;
-    sf::RectangleShape shape;
+    sf::Sprite sprite;
+
+    virtual sf::Transformable& getTransformable() override { return sprite; }
 };
