@@ -82,58 +82,87 @@ class drawable {
     drawable(sf::Vector2f position) : position(position) {}
 
     virtual ~drawable() {}
-    virtual void draw(sf::RenderWindow& window) = 0;
+    virtual void draw(sf::RenderTarget& disp) = 0;
+    virtual sf::Transformable& getTransformable() = 0;
+
+    virtual void update() {}
+
+    // virtual bool isSelected() { return false; }
 
   protected:
     sf::Vector2f position;
+    bool isSelected = false;
 };
 
-class selectable {
-  public:
-    bool isSelected;
-};
-
-class circle : public drawable, selectable {
+class circle : public drawable {
   public:
     circle(sf::Vector2f position, float diameter, sf::Color color)
-        : drawable(position), diameter(diameter), color(color) {}
+        : drawable(position), diameter(diameter), color(color), shape(diameter / 2) {}
 
-    virtual void draw(sf::RenderWindow& window) override {}
+    virtual sf::Transformable& getTransformable() override { return shape; }
+
+    virtual void draw(sf::RenderTarget& disp) override {
+        shape.setPosition(position);
+        shape.setFillColor(color);
+        disp.draw(shape);
+    }
 
   protected:
     float diameter;
     sf::Color color;
+    sf::CircleShape shape;
 };
 
-class rectangle : public drawable, selectable {
+class rectangle : public drawable {
   public:
-    rectangle(sf::Vector2f position, sf::Vector2f end, sf::Color color) : drawable(position), end(end), color(color) {}
+    rectangle(sf::Vector2f position, sf::Vector2f size, sf::Color color)
+        : drawable(position), size(size), color(color), shape(size) {}
 
-    virtual void draw(sf::RenderWindow& window) override {}
+    virtual sf::Transformable& getTransformable() override { return shape; }
+
+    virtual void draw(sf::RenderTarget& disp) override {
+        shape.setPosition(position);
+        shape.setFillColor(color);
+        disp.draw(shape);
+    }
 
   protected:
-    sf::Vector2f end;
+    sf::Vector2f size;
     sf::Color color;
+    sf::RectangleShape shape;
 };
 
-class line : public drawable, selectable {
+class line : public drawable {
   public:
-    line(sf::Vector2f position, float length, sf::Color color) : drawable(position), length(length), color(color) {}
+    line(sf::Vector2f position, float length, float rotation, sf::Color color)
+        : drawable(position), length(length), rotation(rotation), color(color), shape(sf::Vector2f(length, 10)) {}
 
-    virtual void draw(sf::RenderWindow& window) override {}
+    virtual sf::Transformable& getTransformable() override { return shape; }
+
+    virtual void draw(sf::RenderTarget& disp) override {
+        shape.setPosition(position);
+        shape.setRotation(rotation);
+        shape.setFillColor(color);
+        disp.draw(shape);
+    }
 
   protected:
     float length;
+    float rotation;
     sf::Color color;
+    sf::RectangleShape shape;
 };
 
-class picture : public drawable, selectable {
+class picture : public drawable {
   public:
-    picture(sf::Vector2f position, sf::Vector2f end, std::string img) : drawable(position), end(end), img(img) {}
+    picture(sf::Vector2f position, sf::Vector2f size, std::string img) : drawable(position), size(size), img(img) {}
 
-    virtual void draw(sf::RenderWindow& window) override {}
+    virtual sf::Transformable& getTransformable() override { return shape; }
+
+    virtual void draw(sf::RenderTarget& disp) override {}
 
   protected:
-    sf::Vector2f end;
+    sf::Vector2f size;
     std::string img;
+    sf::RectangleShape shape;
 };

@@ -4,6 +4,7 @@
 
 #define WINDOW_SIZE_X 1280
 #define WINDOW_SIZE_Y 720
+#define FRAMERATE 60
 #define LEVEL_FILE_NAME "zorlo.txt"
 
 static std::vector<drawable*> drawables;
@@ -20,23 +21,25 @@ drawable* read_object(std::istream& is) {
         is >> color;
         return new circle(pos, diameter, color);
     } else if (type == "Rect") {
-        sf::Vector2f end;
+        sf::Vector2f size;
         sf::Color color;
-        is >> end;
+        is >> size;
         is >> color;
-        return new rectangle(pos, end, color);
+        return new rectangle(pos, size, color);
     } else if (type == "Line") {
         float length;
+        float rotation;
         sf::Color color;
         is >> length;
+        is >> rotation;
         is >> color;
-        return new line(pos, length, color);
+        return new line(pos, length, rotation, color);
     } else if (type == "Picture") {
-        sf::Vector2f end;
+        sf::Vector2f size;
         std::string img;
-        is >> end;
+        is >> size;
         is >> img;
-        return new picture(pos, end, img);
+        return new picture(pos, size, img);
     } else {
         throw new invalid_type_exception(type);
     }
@@ -44,7 +47,7 @@ drawable* read_object(std::istream& is) {
 
 void load_state() {
     std::ifstream ifs(LEVEL_FILE_NAME);
-    ifs.exceptions(std::ifstream::failbit | std::ifstream::eofbit);
+    // ifs.exceptions(std::ifstream::failbit | std::ifstream::eofbit);
 
     while (!ifs.eof()) {
         drawables.push_back(read_object(ifs));
@@ -59,21 +62,35 @@ void cleanup() {
 }
 
 void save_state() {
-    std::ofstream ofs(LEVEL_FILE_NAME);
-    ofs.close();
+    // std::ofstream ofs(LEVEL_FILE_NAME);
+    // ofs.close();
 }
 
 int main() {
     try {
         load_state();
-    } catch (std::ios_base::failure& e) {
+    } catch (std::exception& e) {
         // Garbage language
         // https://codereview.stackexchange.com/questions/57829/better-option-than-errno-for-file-io-error-handling
-        std::cout << "File error: " << e.what() << std::endl;
+        std::cout << "Error: " << e.what() << std::endl;
         return 1;
     }
 
     // Display window and move objects
+    sf::RenderWindow window(sf::VideoMode(WINDOW_SIZE_X, WINDOW_SIZE_Y), "Stuiter");
+    window.setFramerateLimit(FRAMERATE);
+
+    while (window.isOpen()) {
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) window.close();
+        }
+
+        for (auto& x : drawables)
+            x->draw(window);
+
+        window.display();
+    }
 
     save_state();
     cleanup();
