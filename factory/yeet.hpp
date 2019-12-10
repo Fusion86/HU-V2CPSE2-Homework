@@ -18,7 +18,35 @@ class invalid_format_exception : std::exception {
     std::string expected_character;
 };
 
-std::istream& operator>>(std::istream& is, sf::Vector2f vec) {
+class invalid_type_exception : std::exception {
+  public:
+    invalid_type_exception(std::string err) : err(err) {}
+
+    const char* what() noexcept {
+        std::stringstream ss;
+        ss << "Invalid type. Got '" << err << "'.";
+        return ss.str().c_str();
+    }
+
+  private:
+    std::string err;
+};
+
+class unkown_color_exception : std::exception {
+  public:
+    unkown_color_exception(std::string color) : color(color) {}
+
+    const char* what() noexcept {
+        std::stringstream ss;
+        ss << "Unknown color '" << color << "'.";
+        return ss.str().c_str();
+    }
+
+  private:
+    std::string color;
+};
+
+std::istream& operator>>(std::istream& is, sf::Vector2f& vec) {
     char c;
     is >> c;
     if (c != '(') throw new invalid_format_exception("(");
@@ -31,27 +59,31 @@ std::istream& operator>>(std::istream& is, sf::Vector2f vec) {
     return is;
 }
 
+std::istream& operator>>(std::istream& is, sf::Color& color) {
+    std::string str;
+    is >> str;
+    if (str == "Red")
+        color = sf::Color::Red;
+    else if (str == "Green")
+        color = sf::Color::Green;
+    else if (str == "Blue")
+        color = sf::Color::Blue;
+    else if (str == "White")
+        color = sf::Color::White;
+    else if (str == "Magenta")
+        color = sf::Color::Magenta;
+    else
+        throw new unkown_color_exception(str);
+    return is;
+}
+
 class drawable {
   public:
-    virtual void draw(sf::RenderWindow& window);
+    drawable(sf::Vector2f position) : position(position) {}
 
-    std::ostream& operator<<(std::ostream& os) { return os; }
-
-    std::istream& operator>>(std::istream& is) {
-        std::string type;
-        is >> position;
-        is >> type;
-
-        switch (type) {
-            case "test":
-                break;
-        }
-
-        return is;
-    }
+    virtual void draw(sf::RenderWindow& window) = 0;
 
   protected:
-    std::string name;
     sf::Vector2f position;
 };
 
@@ -60,10 +92,45 @@ class selectable {
     bool isSelected;
 };
 
-class circle : public drawable, selectable {};
+class circle : public drawable, selectable {
+  public:
+    circle(sf::Vector2f position, float diameter) : drawable(position), diameter(diameter) {}
 
-class rectangle : public drawable, selectable {};
+    virtual void draw(sf::RenderWindow& window) override {}
 
-class line : public drawable, selectable {};
+  protected:
+    float diameter;
+};
 
-class picture : public drawable, selectable {};
+class rectangle : public drawable, selectable {
+  public:
+    rectangle(sf::Vector2f position, sf::Vector2f end, sf::Color color) : drawable(position), end(end), color(color) {}
+
+    virtual void draw(sf::RenderWindow& window) override {}
+
+  protected:
+    sf::Vector2f end;
+    sf::Color color;
+};
+
+class line : public drawable, selectable {
+  public:
+    line(sf::Vector2f position, float length, sf::Color color) : drawable(position), length(length), color(color) {}
+
+    virtual void draw(sf::RenderWindow& window) override {}
+
+  protected:
+    float length;
+    sf::Color color;
+};
+
+class picture : public drawable, selectable {
+  public:
+    picture(sf::Vector2f position, sf::Vector2f end, std::string img) : drawable(position), end(end), img(img) {}
+
+    virtual void draw(sf::RenderWindow& window) override {}
+
+  protected:
+    sf::Vector2f end;
+    std::string img;
+};
