@@ -36,6 +36,10 @@ class ball : public drawable {
     bool intersects(const sf::FloatRect& other) {
         return circle.getGlobalBounds().intersects(other);
     }
+
+    bool intersects(const sf::FloatRect& other, sf::FloatRect& intersection) {
+        return circle.getGlobalBounds().intersects(other, intersection);
+    }
 };
 
 class wall : public drawable {

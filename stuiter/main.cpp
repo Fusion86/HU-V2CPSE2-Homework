@@ -25,12 +25,14 @@ int main() {
     wall wall2(sf::Vector2f(0, 0), sf::Vector2f(MUUR_THICC, WINDOW_SIZE_Y));                  // Left
     wall wall3(sf::Vector2f(WINDOW_SIZE_X - MUUR_THICC, 0), sf::Vector2f(20, WINDOW_SIZE_Y)); // Right
     wall wall4(sf::Vector2f(0, WINDOW_SIZE_Y - MUUR_THICC), sf::Vector2f(WINDOW_SIZE_X, 20)); // Bottom
-    wall block(sf::Vector2f(50, 50), sf::Vector2f(20, 200));
+    wall block(sf::Vector2f(400, 400), sf::Vector2f(50, 50));
     walls.push_back(&wall1);
     walls.push_back(&wall2);
     walls.push_back(&wall3);
     walls.push_back(&wall4);
     walls.push_back(&block);
+
+    sf::FloatRect ballIntersection;
 
     action actions[] = {
         action([] { return true; },
@@ -41,16 +43,21 @@ int main() {
         action([&] { return ball.intersects(wall2.getGlobalBounds()); }, [&] { ball.direction.x *= -1; }),
         action([&] { return ball.intersects(wall3.getGlobalBounds()); }, [&] { ball.direction.x *= -1; }),
         action([&] { return ball.intersects(wall4.getGlobalBounds()); }, [&] { ball.direction.y *= -1; }),
-        action([&] { return ball.intersects(block.getGlobalBounds()); }, [&] { ball.direction.x *= -1; }),
+        action([&] { return ball.intersects(block.getGlobalBounds(), ballIntersection); },
+               [&] {
+                   // TODO: Calculate diretion based on ballIntersection
+                   ball.direction.x *= -1;
+               }),
         action(sf::Keyboard::Up, [&] { block.move(sf::Vector2f(0.0, -2.0)); }),
         action(sf::Keyboard::Down, [&] { block.move(sf::Vector2f(0.0, +2.0)); }),
+        action(sf::Keyboard::Left, [&] { block.move(sf::Vector2f(-2.0, 0.0)); }),
+        action(sf::Keyboard::Right, [&] { block.move(sf::Vector2f(+2.0, 0.0)); }),
     };
 
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
-                window.close();
+            if (event.type == sf::Event::Closed) window.close();
         }
 
         // Update scene

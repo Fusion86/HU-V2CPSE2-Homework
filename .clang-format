@@ -4,7 +4,7 @@ IndentCaseLabels: true
 BreakBeforeBraces: Attach
 ColumnLimit: 120
 NamespaceIndentation: All
-AllowShortFunctionsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: false
 AllowShortIfStatementsOnASingleLine: true
 CompactNamespaces: true
 PointerAlignment: Left
