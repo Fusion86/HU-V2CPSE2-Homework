@@ -30,7 +30,7 @@ int main() {
     std::for_each(vec.begin(), vec.end(), [](char& c) { c = std::tolower(c); });
 
     // 6
-    std::map<char, int_fast32_t> index;
+    std::map<char, int> index;
     std::for_each(alpha.begin(), alpha.end(), [&](const char c) { index[c] = std::count(vec.begin(), vec.end(), c); });
 
     // 7.1
@@ -39,9 +39,9 @@ int main() {
                   [](const auto& character) { std::cout << character.first << ": " << character.second << std::endl; });
 
     // 7.2
-    std::map<int_fast32_t, char> valueSortedIndex;
+    std::map<int, char> valueSortedIndex;
     std::for_each(index.begin(), index.end(), [&](const auto& entry) {
-        valueSortedIndex.insert(std::pair<int_fast32_t, char>(entry.second, entry.first));
+        valueSortedIndex.insert(std::pair<int, char>(entry.second, entry.first));
     });
     std::cout << "\nAll alphabetical characters sorted by number of occurences: " << std::endl;
     std::for_each(valueSortedIndex.begin(), valueSortedIndex.end(),
