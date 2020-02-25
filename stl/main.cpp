@@ -40,12 +40,52 @@ int main() {
 
     // 7.2
     std::map<int, char> valueSortedIndex;
-    std::for_each(index.begin(), index.end(), [&](const auto& entry) {
-        valueSortedIndex.insert(std::pair<int, char>(entry.second, entry.first));
-    });
+    std::for_each(index.begin(), index.end(),
+                  [&](const auto& entry) { valueSortedIndex.insert(std::pair<int, char>(entry.second, entry.first)); });
     std::cout << "\nAll alphabetical characters sorted by number of occurences: " << std::endl;
     std::for_each(valueSortedIndex.begin(), valueSortedIndex.end(),
                   [](const auto& character) { std::cout << character.second << ": " << character.first << std::endl; });
+
+    // 8.
+    std::cout << "Top 10 most frequent words: " << std::endl;
+    std::map<std::string, int_fast32_t> words;
+    bool word = false;
+    std::string current = "";
+    std::for_each(vec.begin(), vec.end(), [&](const char& c) {
+        if (c >= 'a' && c <= 'z') {
+            word = true;
+            current += c;
+        } else if (word) {
+            if (words.count(current)) {
+                words[current]++;
+            } else {
+                words[current] = 1;
+            }
+            word = false;
+            current = "";
+        }
+    });
+    if (word) {
+        if (words.count(current)) {
+            words[current]++;
+        } else {
+            words[current] = 1;
+        }
+        word = false;
+        current = "";
+    }
+    std::map<int_fast32_t, std::string> occurenceWords;
+    std::for_each(words.begin(), words.end(), [&](const auto& entry) {
+        occurenceWords.insert(std::pair<int_fast32_t, std::string>(entry.second, entry.first));
+    });
+    std::map<int_fast32_t, std::string>::reverse_iterator it;
+    it = occurenceWords.rbegin();
+    int_fast8_t amount = 10;
+    while (amount) {
+        std::cout << it->second << ": " << it->first << std::endl;
+        it++;
+        amount--;
+    }
 
     return 0;
 }

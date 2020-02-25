@@ -1,104 +1,71 @@
-#include <fstream>
+#include <iostream>
+#include <SFML/Graphics.hpp>
+#include <vector>
+#include "action.hpp"
+#include "rectangle.hpp"
+#include "ball.hpp"
+#include "factory.hpp"
 
-#include "yeet.hpp"
+int main(int argc, char* argv[])
+{
+	sf::RenderWindow window{ sf::VideoMode{ 800, 600 }, "SFML window" };
+	std::vector<std::unique_ptr<Entity>> entities;
+	std::ifstream input("objects.txt");
+	try {
+		for (;;)
+		{
+			entities.push_back(screen_object_read(input));
+		}
+	}
+	catch (end_of_file) {
+		// do nothing
+	}
+	catch (std::exception & problem) {
+		std::cout << problem.what();
+		for (;;) {}
+	}
 
-#define WINDOW_SIZE_X 1280
-#define WINDOW_SIZE_Y 720
-#define FRAMERATE 60
-#define LEVEL_FILE_NAME "zorlo.txt"
+	// Main loop
+	while (window.isOpen())
+	{
+		// Update actions
+		for (auto& entity : entities)
+		{
+			static sf::Vector2i oldMousePos;
+			auto mousePos = sf::Mouse::getPosition(window);
+			if (entity->isInEntity(sf::Vector2f(mousePos)))
+			{
+				if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
+				{
+					entity->update(sf::Vector2f(mousePos));
+				}
+			}
+			oldMousePos = mousePos;
+		}
 
-static std::vector<drawable*> drawables;
+		// Render
+		window.clear();
+		for (auto& entity : entities)
+		{
+			entity->render(window);
+		}
+		window.display();
 
-drawable* read_object(std::istream& is) {
-    std::string type;
-    sf::Vector2f pos;
-    is >> pos >> type;
+		// 60 FPS
+		sf::sleep(sf::milliseconds(16));
 
-    if (type == "Circle") {
-        float diameter;
-        sf::Color color;
-        is >> diameter;
-        is >> color;
-        return new circle(pos, diameter, color);
-    } else if (type == "Rect") {
-        sf::Vector2f size;
-        sf::Color color;
-        is >> size;
-        is >> color;
-        return new rectangle(pos, size, color);
-    } else if (type == "Line") {
-        float length;
-        float rotation;
-        sf::Color color;
-        is >> length;
-        is >> rotation;
-        is >> color;
-        return new line(pos, length, rotation, color);
-    } else if (type == "Picture") {
-        sf::Vector2f scale;
-        std::string img;
-        is >> scale;
-        is >> img;
-        return new picture(pos, scale, img);
-    } else {
-        throw new invalid_type_exception(type);
-    }
-}
+		// Event handling
+		sf::Event event;
+		while (window.pollEvent(event))
+		{
+			if (event.type == sf::Event::Closed || sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+			{
+				window.close();
+			}
+		}
+	}
 
-void load_state() {
-    std::ifstream ifs(LEVEL_FILE_NAME);
+	writeToFile(entities);
 
-    if (!ifs.is_open()) {
-        throw new std::runtime_error("Coudln't open file.");
-    }
-
-    while (!ifs.eof()) {
-        drawables.push_back(read_object(ifs));
-    }
-}
-
-void cleanup() {
-    for (auto x : drawables)
-        delete x;
-
-    drawables.clear();
-}
-
-void save_state() {
-    // std::ofstream ofs(LEVEL_FILE_NAME);
-    // ofs.close();
-}
-
-int main() {
-    try {
-        load_state();
-    } catch (std::exception& e) {
-        // Garbage language
-        // https://codereview.stackexchange.com/questions/57829/better-option-than-errno-for-file-io-error-handling
-        std::cout << "Error: " << e.what() << std::endl;
-        return 1;
-    }
-
-    // Display window and move objects
-    sf::RenderWindow window(sf::VideoMode(WINDOW_SIZE_X, WINDOW_SIZE_Y), "Fabriek");
-    window.setFramerateLimit(FRAMERATE);
-
-    while (window.isOpen()) {
-        sf::Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) window.close();
-        }
-
-        for (auto& x : drawables)
-            x->update();
-
-        for (auto& x : drawables)
-            x->draw(window);
-
-        window.display();
-    }
-
-    save_state();
-    cleanup();
-    return 0;
+	return 0;
 }

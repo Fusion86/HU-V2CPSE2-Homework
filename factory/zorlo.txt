@@ -1,4 +1,0 @@
-(100,100) Picture (0.7,0.7) baby_yoda.jpg
-(300, 300) Circle 130 Blue
-(400,400) Rect (180,120) Red
-(50,50) Line 170 45 Magenta

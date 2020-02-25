@@ -1,15 +1,12 @@
-#include <iostream>
-
-#include "tictac.hpp"
+#include "terminal_tictactoe.hpp"
+#include "SFML_tictactoe.hpp"
 
 int main(int argc, char** argv) {
-    if (argv[0] == "gui") {
-        std::cout << "Playing GUI version" << std::endl;
-        // tictac_gui game;
-        // return game.run();
-    } else {
-        std::cout << "Playing text version" << std::endl;
-        tictac_tui game;
-        return game.run();
-    }
+    // if (argv[1] == "tui") {
+        auto game = terminal_tictactoe();
+        game.play();
+    // } else {
+    //     auto game = SFML_tictactoe();
+    //     game.play();
+    // }
 }

@@ -1,83 +1,67 @@
-#include <SFML/Graphics.hpp>
-
+#include "ball.hpp"
 #include "action.hpp"
-#include "objects.hpp"
+#include "wall.hpp"
+#include "vector"
 
-#define WINDOW_SIZE_X 1280
-#define WINDOW_SIZE_Y 720
-#define MUUR_THICC 20
-#define BALL_SPEED 1 // Dont change this, the collision system will break
-#define FRAMERATE 60
-#define UPDATES_PER_FRAME 4
+int main(int argc, char* argv[]) {
+    sf::RenderWindow window{sf::VideoMode{640, 480}, "SFML window"};
+    ball* ballPtr;
+    ball myBall{sf::Vector2f{320.0, 240.0}, sf::Color::Blue};
+    wall topWall{sf::Vector2f{0.0, 0.0}, sf::Vector2f{640.0, 20.0}, sf::Color::Yellow};
+    wall bottomWall{sf::Vector2f{0.0, 460.0}, sf::Vector2f{640.0, 20.0}, sf::Color::Yellow};
+    wall leftWall{sf::Vector2f{0.0, 0.0}, sf::Vector2f{20.0, 480.0}, sf::Color::Yellow};
+    wall rightWall{sf::Vector2f{620.0, 0.0}, sf::Vector2f{20.0, 480.0}, sf::Color::Yellow};
+    wall block{sf::Vector2f{320.0, 240.0}, sf::Vector2f{30.0, 130.0}, sf::Color::Red};
 
-int main() {
-    // Window setup
-    uint64_t updateCount = 0;
-    uint64_t frameCount = 0;
-    sf::RenderWindow window(sf::VideoMode(WINDOW_SIZE_X, WINDOW_SIZE_Y), "Stuiter");
-    window.setFramerateLimit(FRAMERATE);
+    action actions[] = {action(sf::Keyboard::Left, [&]() { block.move(sf::Vector2f(-2.0, 0.0)); }),
+                        action(sf::Keyboard::Right, [&]() { block.move(sf::Vector2f(+2.0, 0.0)); }),
+                        action(sf::Keyboard::Up, [&]() { block.move(sf::Vector2f(0.0, -2.0)); }),
+                        action(sf::Keyboard::Down, [&]() { block.move(sf::Vector2f(0.0, +2.0)); }),
+                        action(sf::Mouse::Left, [&]() { block.jump(sf::Mouse::getPosition(window)); }),
+                        };
 
-    // Setup other objects
-    std::vector<wall*> walls;
-    ball ball(25);
-    ball.setPosition(sf::Vector2f(WINDOW_SIZE_X / 2, WINDOW_SIZE_Y / 2));
-    wall wall1(sf::Vector2f(0, 0), sf::Vector2f(WINDOW_SIZE_X, MUUR_THICC));                  // Top
-    wall wall2(sf::Vector2f(0, 0), sf::Vector2f(MUUR_THICC, WINDOW_SIZE_Y));                  // Left
-    wall wall3(sf::Vector2f(WINDOW_SIZE_X - MUUR_THICC, 0), sf::Vector2f(20, WINDOW_SIZE_Y)); // Right
-    wall wall4(sf::Vector2f(0, WINDOW_SIZE_Y - MUUR_THICC), sf::Vector2f(WINDOW_SIZE_X, 20)); // Bottom
-    wall block(sf::Vector2f(400, 400), sf::Vector2f(50, 50));
-    walls.push_back(&wall1);
-    walls.push_back(&wall2);
-    walls.push_back(&wall3);
-    walls.push_back(&wall4);
-    walls.push_back(&block);
+    action ballActions[] = {action([&](){return ballPtr->intersect(block.getFloatRekt());}, [&](){ballPtr->bounce(block); }),
+                            action([&](){return ballPtr->intersect(bottomWall.getFloatRekt());}, [&](){ballPtr->bounce(bottomWall); }),
+                            action([&](){return ballPtr->intersect(topWall.getFloatRekt());}, [&](){ballPtr->bounce(topWall); }),
+                            action([&](){return ballPtr->intersect(leftWall.getFloatRekt());}, [&](){ballPtr->bounce(leftWall); }),
+                            action([&](){return ballPtr->intersect(rightWall.getFloatRekt());}, [&](){ballPtr->bounce(rightWall); }),
+                            action([&]{ballPtr->move();})
+                            };
 
-    sf::FloatRect ballIntersection;
-
-    action actions[] = {
-        action([] { return true; },
-               [&] { ball.move(sf::Vector2f(ball.direction.x * BALL_SPEED, ball.direction.y * BALL_SPEED)); }),
-
-        // Not scalable, very sad!
-        action([&] { return ball.intersects(wall1.getGlobalBounds()); }, [&] { ball.direction.y *= -1; }),
-        action([&] { return ball.intersects(wall2.getGlobalBounds()); }, [&] { ball.direction.x *= -1; }),
-        action([&] { return ball.intersects(wall3.getGlobalBounds()); }, [&] { ball.direction.x *= -1; }),
-        action([&] { return ball.intersects(wall4.getGlobalBounds()); }, [&] { ball.direction.y *= -1; }),
-        action([&] { return ball.intersects(block.getGlobalBounds(), ballIntersection); },
-               [&] {
-                   // TODO: Calculate diretion based on ballIntersection
-                   ball.direction.x *= -1;
-               }),
-        action(sf::Keyboard::Up, [&] { block.move(sf::Vector2f(0.0, -2.0)); }),
-        action(sf::Keyboard::Down, [&] { block.move(sf::Vector2f(0.0, +2.0)); }),
-        action(sf::Keyboard::Left, [&] { block.move(sf::Vector2f(-2.0, 0.0)); }),
-        action(sf::Keyboard::Right, [&] { block.move(sf::Vector2f(+2.0, 0.0)); }),
-    };
-
-    while (window.isOpen()) {
-        sf::Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) window.close();
-        }
-
-        // Update scene
-        for (auto& action : actions)
-            action();
-
-        if (updateCount % UPDATES_PER_FRAME == 0) {
-            // Draw calls
-            window.clear();
-
-            ball.draw(window);
-            for (auto wall : walls)
-                wall->draw(window);
-
-            window.display();
-            frameCount++;
-        }
-
-        updateCount++;
+    ball* balls[] = {&myBall};
+    std::vector<drawable*> drawables = {&topWall, &bottomWall, &rightWall, &leftWall, &block};
+    for(auto* ball : balls){
+        drawables.push_back(ball);
     }
 
+    while (window.isOpen()) {
+        for (auto& action : actions) {
+            action();
+        }
+        
+        for (ball* ball : balls){
+            ballPtr = ball;
+            for (auto& action : ballActions) {
+                action();
+            }
+        }
+
+        window.clear();
+
+        for(auto* drawable : drawables){
+            drawable->draw(window);
+        }
+
+        window.display();
+
+        sf::sleep(sf::milliseconds(2));
+
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
+                window.close();
+            }
+        }
+    }
     return 0;
 }

@@ -1,0 +1,3 @@
+(261,113) PICTURE uml.png
+(10,475) CIRCLE blue 50
+(612,347) RECTANGLE red (80,160)
